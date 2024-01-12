@@ -14,12 +14,17 @@ module.exports = {
     await interaction.deferReply()
     let city = interaction.options.getString('city')
     city = cleanString(city)
-    const data = await getWeather(city)
-    const { weather } = data
-    // eslint-disable-next-line camelcase
-    const { temp, feels_like, humidity, pressure } = data.main
-    // eslint-disable-next-line camelcase
-    await interaction.editReply(`Currently, in ${city}:\n${temp}°C - Feels like ${feels_like}°C\n${humidity}% humidity and ${pressure}hPa pressure\n${weather[0].main} - ${weather[0].description}`)
+    try {
+      const data = await getWeather(city)
+      const { weather } = data
+      // eslint-disable-next-line camelcase
+      const { temp, feels_like, humidity, pressure } = data.main
+      // eslint-disable-next-line camelcase
+      await interaction.editReply(`Currently, in ${city}:\n${temp}°C - Feels like ${feels_like}°C\n${humidity}% humidity and ${pressure}hPa pressure\n${weather[0].main} - ${weather[0].description}`)
+    } catch (error) {
+      console.log(error)
+      await interaction.editReply(`Sorry, I couldn't find ${city}.`)
+    }
   }
 }
 
@@ -30,7 +35,7 @@ async function getWeather (city) {
 
   let promise = axios.get(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${API_KEY}`)
 
-  let data = await promise.then((response) => response.data).catch((error) => console.log(error))
+  let data = await promise.then((response) => response.data)
 
   const { lat, lon } = data[0]
 
@@ -38,7 +43,7 @@ async function getWeather (city) {
 
   promise = axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`)
 
-  data = await promise.then((response) => response.data).catch((error) => console.log(error))
+  data = await promise.then((response) => response.data)
 
   return data
 }
