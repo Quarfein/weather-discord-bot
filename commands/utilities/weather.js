@@ -12,7 +12,8 @@ module.exports = {
         .setRequired(true)),
   async execute (interaction) {
     await interaction.deferReply()
-    const city = interaction.options.getString('city')
+    let city = interaction.options.getString('city')
+    city = cleanString(city)
     const data = await getWeather(city)
     const { weather } = data
     // eslint-disable-next-line camelcase
@@ -40,4 +41,10 @@ async function getWeather (city) {
   data = await promise.then((response) => response.data).catch((error) => console.log(error))
 
   return data
+}
+
+function cleanString (string) {
+  let modString = string.toLowerCase()
+  modString = modString[0].toUpperCase() + modString.slice(1)
+  return modString
 }
